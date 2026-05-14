@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INTEA Copy Generator</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #EFE7D4; min-height: 100vh; color: #1A0088; }
+.header { background: #1A0088; padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header-brand { font-size: 11px; color: #FF5E32; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 3px; }
+.header-title { font-size: 20px; font-weight: 700; color: #fff; }
+.header-sub { font-size: 11px; color: #8A8098; text-align: right; line-height: 1.6; }
+.page { max-width: 860px; margin: 0 auto; padding: 28px 20px 60px; }
+.card { background: #fff; border-radius: 16px; padding: 28px; box-shadow: 0 2px 24px rgba(26,0,136,0.07); margin-bottom: 20px; }
+.card-title { font-size: 15px; font-weight: 700; color: #1A0088; margin-bottom: 22px; }
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.fm { margin-bottom: 16px; }
+label { display: block; font-size: 11px; font-weight: 700; color: #8A8098; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+label span { font-weight: 400; text-transform: none; letter-spacing: 0; color: #bbb; }
+select, textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1.5px solid #D9CFBA; background: #fff; font-size: 13px; color: #1A0088; font-family: inherit; outline: none; transition: border-color 0.2s; }
+select { cursor: pointer; }
+select:focus, textarea:focus { border-color: #1A0088; }
+textarea { resize: vertical; line-height: 1.6; }
+.btn-gen { width: 100%; padding: 14px; border-radius: 10px; border: none; background: #FF5E32; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.2s; margin-top: 6px; }
+.btn-gen:hover:not(:disabled) { background: #e54e25; }
+.btn-gen:disabled { background: #D9CFBA; color: #bbb; cursor: not-allowed; }
+.hint { font-size: 11px; color: #bbb; text-align: center; margin-top: 10px; }
+.loading { display: none; text-align: center; padding: 24px; background: #f9f6f0; border-radius: 10px; margin-top: 16px; }
+.loading p { font-size: 13px; color: #1A0088; margin-bottom: 12px; }
+.dots { display: flex; justify-content: center; gap: 6px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: #1A0088; animation: pulse 1.2s ease-in-out infinite; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes pulse { 0%,80%,100%{opacity:0.2;transform:scale(0.7)}40%{opacity:1;transform:scale(1)} }
+.err { display: none; font-size: 12px; color: #cc3300; margin-top: 12px; padding: 12px 16px; background: #fff0ee; border-radius: 8px; border-left: 3px solid #FF5E32; line-height: 1.6; }
+.out-wrap { display: none; }
+.sum-bar { background: #1A0088; border-radius: 12px; padding: 14px 20px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; }
+.sum-text { font-size: 13px; color: #EFE7D4; line-height: 1.5; }
+.sum-text strong { color: #FF5E32; }
+.btn-new { font-size: 12px; padding: 7px 18px; border-radius: 20px; border: 1.5px solid #FF5E32; background: transparent; color: #FF5E32; cursor: pointer; font-family: inherit; font-weight: 600; white-space: nowrap; }
+.btn-new:hover { background: #FF5E32; color: #fff; }
+.topic-pill { background: #fff; border-radius: 10px; padding: 10px 16px; margin-bottom: 16px; font-size: 13px; color: #8A8098; }
+.topic-pill strong { color: #1A0088; }
+.ob { background: #fff; border: 1.5px solid #E8E0D0; border-radius: 14px; margin-bottom: 16px; overflow: hidden; box-shadow: 0 1px 8px rgba(26,0,136,0.05); }
+.ob-hdr { display: flex; justify-content: space-between; align-items: center; padding: 13px 18px; background: #1A0088; }
+.ob-title { font-size: 13px; font-weight: 700; color: #FF5E32; }
+.btn-copy { font-size: 11px; padding: 5px 14px; border-radius: 20px; border: 1.5px solid #FF5E32; background: transparent; color: #FF5E32; cursor: pointer; font-family: inherit; font-weight: 600; transition: all 0.2s; }
+.btn-copy:hover, .btn-copy.cp { background: #FF5E32; color: #fff; }
+.ob-body { padding: 18px; font-size: 13px; color: #1A0088; line-height: 1.85; white-space: pre-wrap; word-break: break-word; }
+.disc { background: #fff; border-radius: 10px; padding: 14px 18px; font-size: 12px; color: #8A8098; line-height: 1.7; margin-bottom: 18px; border-left: 3px solid #EFE7D4; }
+.disc strong { color: #FF5E32; }
+.btn-another { display: block; width: 100%; padding: 13px; border-radius: 10px; border: none; background: #1A0088; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.btn-another:hover { background: #120060; }
+@media (max-width: 580px) { .g2, .g3 { grid-template-columns: 1fr; } .page { padding: 16px 14px 40px; } .card { padding: 20px 16px; } .header { padding: 14px 18px; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-brand">INTEA</div>
+    <div class="header-title">Copy Generator</div>
+  </div>
+  <div class="header-sub">Slide content · Instagram<br>LinkedIn · Team repost</div>
+</div>
+
+<div class="page">
+  <div class="card" id="formCard">
+    <div class="card-title">Brief your post</div>
+    <div class="g2">
+      <div>
+        <label>Content pillar *</label>
+        <select id="pillar" onchange="updateTypes()">
+          <option value="">Select pillar...</option>
+          <option>Educate &amp; Inform</option>
+          <option>Insight &amp; Opinion</option>
+          <option>Credibility &amp; Proof</option>
+          <option>Community &amp; Culture</option>
+          <option>Convert &amp; Engage</option>
+        </select>
+      </div>
+      <div>
+        <label>Post type *</label>
+        <select id="postType" onchange="checkReady()">
+          <option value="">Select pillar first</option>
+        </select>
+      </div>
+    </div>
+    <div class="g3">
+      <div>
+        <label>Audience *</label>
+        <select id="audience" onchange="checkReady()">
+          <option value="">Select...</option>
+          <option>L&D professionals</option>
+          <option>HR directors &amp; C-suite</option>
+          <option>SMEs / subject matter experts</option>
+          <option>Brokastis community</option>
+          <option>General / mixed</option>
+        </select>
+      </div>
+      <div>
+        <label>Language</label>
+        <select id="language">
+          <option>Bilingual (LV + EN)</option>
+          <option>English only</option>
+          <option>Latvian only</option>
+        </select>
+      </div>
+      <div>
+        <label>Tone</label>
+        <select id="tone">
+          <option>Neutral</option>
+          <option>More provocative</option>
+          <option>Warmer</option>
+          <option>More data-driven</option>
+        </select>
+      </div>
+    </div>
+    <div class="fm">
+      <label>Topic * <span>— be specific, plain language</span></label>
+      <textarea id="topic" rows="2" oninput="checkReady()" placeholder="E.g. 'why most LMS implementations fail in the first 6 months'"></textarea>
+    </div>
+    <div class="fm">
+      <label>Extra context <span>— optional</span></label>
+      <textarea id="context" rows="2" placeholder="A real client situation, a stat, a Brokastis speaker name, an event date..."></textarea>
+    </div>
+    <button class="btn-gen" id="genBtn" onclick="generate()" disabled>Generate content →</button>
+    <div class="hint" id="hint">Select pillar, post type, audience and add a topic to generate</div>
+    <div class="loading" id="loading"><p>Writing in INTEA's voice...</p><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+    <div class="err" id="errBox"></div>
+  </div>
+
+  <div class="out-wrap" id="outWrap">
+    <div class="sum-bar">
+      <div class="sum-text" id="sumText"></div>
+      <button class="btn-new" onclick="resetForm()">← New post</button>
+    </div>
+    <div class="topic-pill" id="topicPill"></div>
+    <div class="ob"><div class="ob-hdr"><div class="ob-title">🎨 Slide content — paste into Canva</div><button class="btn-copy" onclick="cp(this,'s1')">Copy</button></div><div class="ob-body" id="s1"></div></div>
+    <div class="ob"><div class="ob-hdr"><div class="ob-title">📷 Instagram caption</div><button class="btn-copy" onclick="cp(this,'s2')">Copy</button></div><div class="ob-body" id="s2"></div></div>
+    <div class="ob"><div class="ob-hdr"><div class="ob-title">💼 LinkedIn caption</div><button class="btn-copy" onclick="cp(this,'s3')">Copy</button></div><div class="ob-body" id="s3"></div></div>
+    <div class="ob"><div class="ob-hdr"><div class="ob-title">🔁 Team repost prompt</div><button class="btn-copy" onclick="cp(this,'s4')">Copy</button></div><div class="ob-body" id="s4"></div></div>
+    <div class="disc"><strong>Remember:</strong> This is a first draft. Read it, adjust anything that doesn't feel right, and add details only you know.</div>
+    <button class="btn-another" onclick="resetForm()">Generate another post →</button>
+  </div>
+</div>
+
+<script>
+const PT = {
+  "Educate & Inform":["Tip carousel","Stat / Did You Know","Framework / Process","How-to guide"],
+  "Insight & Opinion":["Hot take / Bold statement","Trend analysis","Signature reframe","Opinion piece"],
+  "Credibility & Proof":["Before / After","Client result","Process walkthrough","Testimonial"],
+  "Community & Culture":["Brokastis announcement","Speaker spotlight","Team / BTS","Event recap"],
+  "Convert & Engage":["Service awareness","CTA post","Discovery offer"]
+};
+
+const BV = `INTEA Brand Voice — source of truth for all copy.
+WHO INTEA IS: Full-service digital learning agency, Riga, Latvia. Founded 2009. 17 years building e-learning. One-sentence: We help organisations build learning that actually works — not just learning that exists.
+IDEAL CLIENT: Mid-size company. L&D is one person wearing many hats. Smart, under-resourced. Comes to INTEA because: needs learning fast that actually works / L&D strategy is non-existent / has boring material to turn into something people complete / leadership asking questions they cannot answer. What they are really buying: confidence.
+BELIEFS: 70% of engagement problems are relevance problems. L&D teams make assumptions about learners without ever talking to them. Most companies do not need a better LMS — they need better content. Mandatory compliance training is the single biggest killer of learning culture. Good learning design is invisible — learners just remember more and perform better. Most agencies start building the moment they have a brief. INTEA starts with the learning problem. Format comes last.
+MIDAS: INTEA own instructional design framework. Built from 17 years of practice. Turns folders of slides and PDFs into learning with a real spine.
+CLIENT SITUATIONS: Beautiful course 25% completion rebuilt structure not visuals 70% completion. LMS for 2 years under 10% staff logged in INTEA came in at strategy level active company-wide in months. Years of boring internal material applied MIDAS shorter course highest completion they had ever had. Onboarding across multiple countries onboarding cut 40%.
+RESULTS: Completion from under 30% to over 70%. Onboarding cut 40%. Learning tied to measurable outcomes.
+INDUSTRIES: Financial services, retail, manufacturing, healthcare, public sector, professional services.
+BROKASTIS: Monthly professional breakfast event in Riga. 3 speakers, L&D and HR professionals. A community that keeps growing. No competitor in the Baltics has this. Write about it as a community to join not an event to attend.
+VOICE: Direct and a little provocative. Practical and no-nonsense. Short sentences. One idea per sentence. State the point first. Use actually when challenging assumptions.
+NEVER USE: innovative synergy leverage robust seamless excited to share proud to announce digital landscape cutting-edge impactful empower transformative learner-centric.
+ALWAYS USE: actually honest real works specific direct 17 years most organisations almost nobody here is what we think.
+ENGAGEMENT HOOK: Every single caption ends with a real question the reader can actually answer. Never skip.
+HASHTAGS LinkedIn 3-5: #elearning #LnD #learningdesign #LMS #digitallearning #instructionaldesign
+HASHTAGS Instagram 8-12: #elearning #LnD #learningdesign #digitallearning #LMS #instructionaldesign #corporatetraining #HRtech #talentdevelopment #workplacelearning #INTEABrokastis #intea
+BILINGUAL FORMAT Instagram: Latvian caption first. Then —— on its own line. Then English translation. Hashtags at end in English only.`;
+
+function updateTypes(){
+  const p=document.getElementById('pillar').value;
+  const s=document.getElementById('postType');
+  s.innerHTML=p?'<option value="">Select type...</option>':'<option value="">Select pillar first</option>';
+  if(p&&PT[p])PT[p].forEach(t=>{const o=document.createElement('option');o.value=o.textContent=t;s.appendChild(o);});
+  checkReady();
+}
+
+function checkReady(){
+  const ok=document.getElementById('pillar').value&&document.getElementById('postType').value&&document.getElementById('audience').value&&document.getElementById('topic').value.trim().length>3;
+  document.getElementById('genBtn').disabled=!ok;
+  document.getElementById('hint').style.display=ok?'none':'block';
+}
+
+function parse(text,header){
+  const m=text.match(new RegExp(`=== ${header} ===([\\s\\S]*?)(?==== |$)`));
+  return m?m[1].trim():'(Section not found — please try generating again)';
+}
+
+function cp(btn,id){
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(()=>{
+    btn.textContent='✓ Copied';btn.classList.add('cp');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('cp');},2000);
+  });
+}
+
+async function generate(){
+  const pillar=document.getElementById('pillar').value;
+  const postType=document.getElementById('postType').value;
+  const audience=document.getElementById('audience').value;
+  const language=document.getElementById('language').value;
+  const tone=document.getElementById('tone').value;
+  const topic=document.getElementById('topic').value.trim();
+  const context=document.getElementById('context').value.trim();
+
+  document.getElementById('genBtn').disabled=true;
+  document.getElementById('loading').style.display='block';
+  document.getElementById('errBox').style.display='none';
+
+  const isC=['Tip carousel','Framework / Process','How-to guide','Process walkthrough','Event recap'].includes(postType);
+  const isBi=language==='Bilingual (LV + EN)';
+  const isLV=language==='Latvian only';
+
+  const slideI=isC?`Cover slide: Bold headline max 10 words + optional subheadline.\nSlides 2-5: SHORT headline max 8 words + 2-3 sentence body. One clear specific actionable point per slide.\nLast slide: Short CTA line max 8 words.`:`Main headline: 1 bold statement max 10 words.\nSubtext: 1-2 supporting lines max 20 words.\nBottom CTA: max 8 words.`;
+  const igI=isBi?`Full Latvian caption 3-5 punchy lines. Latvian engagement hook real question. —— separator. English translation. English engagement hook. Hashtags 8-10 English only.`:isLV?`Full Latvian caption 3-5 lines. Real question at end. Hashtags in English.`:`English caption 3-5 punchy lines. Real question at end. Hashtags 8-10.`;
+
+  const prompt=`You are the copy generator for INTEA. Write strictly according to the brand voice below.\n\n${BV}\n\nGenerate for:\n- Topic: ${topic}\n- Pillar: ${pillar}\n- Post type: ${postType}\n- Audience: ${audience}\n- Language: ${language}\n- Tone: ${tone}\n${context?`- Context: ${context}`:''}\n\nOutput EXACTLY four sections. Use these exact headers. No other text.\n\n=== SLIDE CONTENT ===\n${slideI}\n\n=== INSTAGRAM CAPTION ===\n${igI}\n\n=== LINKEDIN CAPTION ===\nEnglish only. Direct a little provocative. Opening hook 1 bold line — never start with I am excited or In todays world. Body 2-3 short paragraphs max 3 sentences each. Closing line reinforcing INTEA POV. Engagement hook real question. Hashtags 3-5 only.\n\n=== TEAM REPOST PROMPT ===\n2 sentences a team member pastes when reposting from personal LinkedIn. First-person human adds personal angle. Include [your name] placeholder.`;
+
+  try{
+    const r=await fetch('/.netlify/functions/generate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:1200,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+
+    let data;
+    try { data=await r.json(); } catch(e) { throw new Error('Invalid response from server. Please try again.'); }
+
+    if(!r.ok){
+      const msg=data&&data.error
+        ? (typeof data.error==='string' ? data.error : (data.error.message||JSON.stringify(data.error)))
+        : `Server error ${r.status}`;
+      throw new Error(msg);
+    }
+
+    if(!data.content||!data.content[0]) throw new Error('Empty response. Please try again.');
+
+    const text=data.content.map(b=>b.text||'').join('');
+    document.getElementById('s1').textContent=parse(text,'SLIDE CONTENT');
+    document.getElementById('s2').textContent=parse(text,'INSTAGRAM CAPTION');
+    document.getElementById('s3').textContent=parse(text,'LINKEDIN CAPTION');
+    document.getElementById('s4').textContent=parse(text,'TEAM REPOST PROMPT');
+    document.getElementById('sumText').innerHTML=`<strong>${pillar}</strong> · ${postType} · ${audience} · ${language}`;
+    document.getElementById('topicPill').innerHTML=`<strong>Topic:</strong> ${topic}${context?` &nbsp;·&nbsp; <strong>Context:</strong> ${context}`:''}`;
+    document.getElementById('formCard').style.display='none';
+    document.getElementById('outWrap').style.display='block';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }catch(e){
+    const b=document.getElementById('errBox');
+    b.textContent=e.message||'Something went wrong. Please try again.';
+    b.style.display='block';
+    document.getElementById('genBtn').disabled=false;
+  }
+  document.getElementById('loading').style.display='none';
+}
+
+function resetForm(){
+  document.getElementById('formCard').style.display='block';
+  document.getElementById('outWrap').style.display='none';
+  document.getElementById('genBtn').disabled=false;
+  document.getElementById('errBox').style.display='none';
+  document.getElementById('topic').value='';
+  document.getElementById('context').value='';
+  document.getElementById('pillar').value='';
+  document.getElementById('postType').innerHTML='<option value="">Select pillar first</option>';
+  document.getElementById('audience').value='';
+  document.getElementById('hint').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
